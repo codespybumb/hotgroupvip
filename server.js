@@ -1,5 +1,5 @@
 import express from "express";
-import mlAuth from "./routes/mlAuth.js";
+import mlAuth from "../routes/mlAuth.js";
 
 const app = express();
 
