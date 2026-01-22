@@ -80,25 +80,16 @@ ${invite.invite_link}`
 ========================= */
 
 // Sempre que alguém entra no grupo
-bot.on('new_chat_members', async (msg) => {
-  for (const member of msg.new_chat_members) {
-    if (!vipUsers.has(member.id)) {
-      try {
-        await bot.banChatMember(VIP_GROUP_ID, member.id)
-        console.log(`❌ Usuário ${member.id} removido (não VIP)`)
-      } catch (err) {
-        console.error('❌ Erro ao remover usuário:', err)
-      }
-    } else {
-      console.log(`✅ Usuário ${member.id} autorizado`)
-    }
-  }
-})
-
-/* =========================
-   LOG DE ERROS GERAIS
-========================= */
-
 bot.on('polling_error', (err) => {
-  console.error('🚨 Polling error:', err.message)
+  if (
+    err.message.includes('ETELEGRAM') ||
+    err.message.includes('ECONNRESET') ||
+    err.message.includes('EFATAL')
+  ) {
+    // ignora erros comuns do polling
+    return
+  }
+
+  console.error('🚨 Erro real no polling:', err)
 })
+
