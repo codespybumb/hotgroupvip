@@ -1,15 +1,12 @@
-import express from 'express'
 import './src/bot.js'
-
-console.log('ENV BOT_TOKEN =', process.env.BOT_TOKEN)
+import express from 'express'
 
 const app = express()
-const PORT = process.env.PORT || 8080
 
-app.get('/', (req, res) => {
-  res.send('Bot VIP rodando 🚀')
+app.get('/', (_, res) => {
+  res.send('Bot VIP online')
 })
 
-app.listen(PORT, () => {
-  console.log(`Server rodando na porta ${PORT}`)
+app.listen(8080, () => {
+  console.log('Server rodando na porta 8080')
 })

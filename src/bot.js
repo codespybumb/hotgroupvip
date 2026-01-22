@@ -1,95 +1,54 @@
 import TelegramBot from 'node-telegram-bot-api'
+import { PrismaClient } from '@prisma/client'
 
-/* =========================
-   CONFIGURAÇÃO
-========================= */
+const prisma = new PrismaClient()
 
 const token = process.env.BOT_TOKEN
-const VIP_GROUP_ID = process.env.VIP_GROUP_ID
+const VIP_GROUP_ID = Number(process.env.VIP_GROUP_ID)
 
-if (!token) {
-  throw new Error('❌ BOT_TOKEN não encontrado')
+if (!token || !VIP_GROUP_ID) {
+  throw new Error('ENV ausente')
 }
-
-if (!VIP_GROUP_ID) {
-  throw new Error('❌ VIP_GROUP_ID não encontrado')
-}
-
-/* =========================
-   INICIALIZAÇÃO
-========================= */
 
 const bot = new TelegramBot(token, { polling: true })
 
-console.log('🤖 Bot Telegram iniciado')
-
-/* =========================
-   CONTROLE VIP (TEMPORÁRIO)
-   ⚠️ Depois será banco
-========================= */
-
-const vipUsers = new Set()
-
-/* =========================
-   COMANDOS
-========================= */
+console.log('🤖 Bot iniciado')
 
 // /start
 bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(
-    msg.chat.id,
-    `👋 Bem-vindo!
-
-Para acessar o grupo VIP:
-➡️ use /vip`
-  )
+  bot.sendMessage(msg.chat.id, '👋 Use /vip para liberar acesso')
 })
 
-// /vip — simula pagamento aprovado
+// /vip
 bot.onText(/\/vip/, async (msg) => {
   const userId = msg.from.id
 
-  try {
-    vipUsers.add(userId)
+  await prisma.vipUser.upsert({
+    where: { id: userId },
+    update: {},
+    create: { id: userId }
+  })
 
-    const invite = await bot.createChatInviteLink(VIP_GROUP_ID, {
-      member_limit: 1
+  const invite = await bot.createChatInviteLink(VIP_GROUP_ID, {
+    member_limit: 1
+  })
+
+  bot.sendMessage(
+    msg.chat.id,
+    `✅ Acesso liberado:\n${invite.invite_link}`
+  )
+})
+
+// valida entrada no grupo
+bot.on('new_chat_members', async (msg) => {
+  for (const member of msg.new_chat_members) {
+    const vip = await prisma.vipUser.findUnique({
+      where: { id: member.id }
     })
 
-    await bot.sendMessage(
-      msg.chat.id,
-      `✅ Pagamento aprovado!
-
-Entre no grupo VIP:
-${invite.invite_link}`
-    )
-
-    console.log(`✅ Acesso VIP liberado para ${userId}`)
-  } catch (err) {
-    console.error('❌ Erro ao gerar convite:', err)
-
-    bot.sendMessage(
-      msg.chat.id,
-      '❌ Erro ao liberar acesso. Tente novamente.'
-    )
+    if (!vip) {
+      await bot.banChatMember(VIP_GROUP_ID, member.id)
+      console.log(`❌ ${member.id} removido`)
+    }
   }
 })
-
-/* =========================
-   SEGURANÇA DO GRUPO
-========================= */
-
-// Sempre que alguém entra no grupo
-bot.on('polling_error', (err) => {
-  if (
-    err.message.includes('ETELEGRAM') ||
-    err.message.includes('ECONNRESET') ||
-    err.message.includes('EFATAL')
-  ) {
-    // ignora erros comuns do polling
-    return
-  }
-
-  console.error('🚨 Erro real no polling:', err)
-})
-

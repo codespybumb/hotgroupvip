@@ -1,16 +1,13 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-model User {
-  id         Int      @id @default(autoincrement())
-  telegramId String   @unique
-  username   String?
-  isActive   Boolean  @default(false)
-  createdAt  DateTime @default(now())
+model VipUser {
+  id        Int      @id
+  createdAt DateTime @default(now())
 }
