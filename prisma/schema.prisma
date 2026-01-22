@@ -15,3 +15,12 @@ model VipUser {
   expiresAt   DateTime?
   createdAt   DateTime @default(now())
 }
+
+model MlAuth {
+  id           Int      @id @default(autoincrement())
+  mlUserId     BigInt   @unique
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+}
