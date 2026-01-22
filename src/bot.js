@@ -1,16 +1,16 @@
-import 'dotenv/config'
 import TelegramBot from 'node-telegram-bot-api'
 
-const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, {
-  polling: true
-})
+const token = process.env.BOT_TOKEN
+console.log('TOKEN RECEBIDO:', token)
 
-const VIP_GROUP_ID = Number(process.env.VIP_GROUP_ID)
+if (!token) {
+  throw new Error('BOT_TOKEN não recebido pelo container')
+}
 
-// SIMULA um banco (depois vira Prisma)
-const vipUsers = new Set()
+const bot = new TelegramBot(token, { polling: true })
 
 console.log('🤖 Bot Telegram iniciado')
+
 
 // Comando /start
 bot.onText(/\/start/, (msg) => {
