@@ -8,6 +8,10 @@ datasource db {
 }
 
 model VipUser {
-  id        Int      @id
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  telegramId  BigInt   @unique
+  username    String?
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
 }
