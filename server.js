@@ -1,8 +1,9 @@
 import express from 'express'
-import './src/bot.js' // 👈 ISSO INICIA O BOT
+import './src/bot.js'
+
+console.log('ENV BOT_TOKEN =', process.env.BOT_TOKEN)
 
 const app = express()
-
 const PORT = process.env.PORT || 8080
 
 app.get('/', (req, res) => {
