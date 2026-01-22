@@ -1,12 +1,12 @@
 import express from "express";
-import mlAuth from "./src/mlAuth.js";
+import mlAuth from "./routes/mlAuth.js";
 
-const app = express();        // 1️⃣ cria o app
-app.use(express.json());     // 2️⃣ middlewares base
+const app = express();
 
-app.use("/ml", mlAuth);      // 3️⃣ rotas
+app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("🤖 Bot iniciado");
+app.use("/ml", mlAuth);
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Servidor HTTP rodando");
 });
