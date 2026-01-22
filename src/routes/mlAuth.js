@@ -1,7 +1,9 @@
 import express from "express";
+import axios from "axios";
 
 const router = express.Router();
 
+// 👉 LOGIN
 router.get("/login", (req, res) => {
   const url =
     "https://auth.mercadolivre.com.br/authorization" +
@@ -12,10 +14,7 @@ router.get("/login", (req, res) => {
   res.redirect(url);
 });
 
-export default router;
-
-import axios from "axios";
-
+// 👉 CALLBACK
 router.get("/callback", async (req, res) => {
   const { code } = req.query;
 
@@ -42,7 +41,6 @@ router.get("/callback", async (req, res) => {
 
     const { access_token, refresh_token, user_id, expires_in } = response.data;
 
-    // 👉 depois a gente salva no banco
     console.log("TOKEN ML:", access_token);
 
     res.send("Mercado Livre conectado com sucesso ✅");
@@ -51,3 +49,5 @@ router.get("/callback", async (req, res) => {
     res.status(500).send("Erro ao autenticar no Mercado Livre");
   }
 });
+
+export default router;
