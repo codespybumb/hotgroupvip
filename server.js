@@ -1,5 +1,8 @@
 import './src/bot.js'
 import express from 'express'
+import mlAuth from "./src/mlAuth.js";
+
+app.use("/ml", mlAuth);
 
 const app = express()
 
