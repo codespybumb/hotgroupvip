@@ -1,11 +1,12 @@
-const express = require('express')
-const webhook = require('./webhook')
+import express from 'express'
 
 const app = express()
-app.use(express.json())
 
-app.post('/webhook', webhook)
+app.get('/', (req, res) => {
+  res.send('BotVIP rodando 🚀')
+})
 
-app.listen(process.env.PORT, () => {
-  console.log(`Servidor rodando na porta ${process.env.PORT}`)
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => {
+  console.log(`Server rodando na porta ${PORT}`)
 })
