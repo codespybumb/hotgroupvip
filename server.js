@@ -1,15 +1,12 @@
-import './src/bot.js'
-import express from 'express'
+import express from "express";
 import mlAuth from "./src/mlAuth.js";
 
-app.use("/ml", mlAuth);
+const app = express();        // 1️⃣ cria o app
+app.use(express.json());     // 2️⃣ middlewares base
 
-const app = express()
+app.use("/ml", mlAuth);      // 3️⃣ rotas
 
-app.get('/', (_, res) => {
-  res.send('Bot VIP online')
-})
-
-app.listen(8080, () => {
-  console.log('Server rodando na porta 8080')
-})
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("🤖 Bot iniciado");
+});
