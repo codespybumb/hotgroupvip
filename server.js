@@ -1,12 +1,19 @@
-import express from "express";
-import mlAuth from "./src/routes/mlAuth.js";
+const express = require("express");
+
+const mlAuth = require("./src/routes/mlAuth");
 
 const app = express();
 
 app.use(express.json());
 
+// Mercado Livre
 app.use("/ml", mlAuth);
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Servidor HTTP rodando");
+app.get("/", (req, res) => {
+  res.send("API ONLINE");
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("🚀 Server rodando na porta", PORT);
 });
