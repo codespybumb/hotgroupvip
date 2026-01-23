@@ -1,9 +1,10 @@
 import express from "express";
 import axios from "axios";
+import prisma from "../prisma.js";
 
 const router = express.Router();
 
-// 👉 LOGIN
+// LOGIN
 router.get("/login", (req, res) => {
   const url =
     "https://auth.mercadolivre.com.br/authorization" +
@@ -14,7 +15,7 @@ router.get("/login", (req, res) => {
   res.redirect(url);
 });
 
-// 👉 CALLBACK
+// CALLBACK
 router.get("/callback", async (req, res) => {
   const { code } = req.query;
 
@@ -33,17 +34,32 @@ router.get("/callback", async (req, res) => {
         redirect_uri: process.env.ML_REDIRECT_URI,
       },
       {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       }
     );
 
     const { access_token, refresh_token, user_id, expires_in } = response.data;
 
-    console.log("TOKEN ML:", access_token);
+    const expiresAt = new Date(Date.now() + expires_in * 1000);
 
-    res.send("Mercado Livre conectado com sucesso ✅");
+    // salva no banco
+    await prisma.mlAuth.upsert({
+      where: { mlUserId: BigInt(user_id) },
+      update: {
+        accessToken: access_token,
+        refreshToken: refresh_token,
+        expiresAt: expiresAt,
+      },
+      create: {
+        mlUserId: BigInt(user_id),
+        accessToken: access_token,
+        refreshToken: refresh_token,
+        expiresAt: expiresAt,
+      },
+    });
+
+    res.send("Mercado Livre conectado e salvo no banco ✅");
+
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.status(500).send("Erro ao autenticar no Mercado Livre");
