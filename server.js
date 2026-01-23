@@ -1,6 +1,5 @@
-const express = require("express");
-
-const mlAuth = require("./src/routes/mlAuth");
+import express from "express";
+import mlAuth from "./src/routes/mlAuth.js";
 
 const app = express();
 

@@ -1,6 +1,6 @@
-const express = require("express");
-const axios = require("axios");
-const { prisma } = require("../prisma");
+import express from "express";
+import axios from "axios";
+import { prisma } from "../prisma.js";
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ router.get("/login", async (req, res) => {
   }
 
   try {
-    const response = await axios.post(
+    const { data } = await axios.post(
       "https://api.mercadolibre.com/oauth/token",
       {
         grant_type: "authorization_code",
@@ -25,7 +25,6 @@ router.get("/login", async (req, res) => {
       { headers: { "Content-Type": "application/json" } }
     );
 
-    const data = response.data;
     const expiresAt = new Date(Date.now() + data.expires_in * 1000);
 
     await prisma.mercadoLivreToken.upsert({
@@ -54,4 +53,4 @@ router.get("/login", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
