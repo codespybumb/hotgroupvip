@@ -1,70 +1,81 @@
-import express from 'express'
-import axios from 'axios'
-import { PrismaClient } from '@prisma/client'
+const express = require("express");
+const axios = require("axios");
+const { prisma } = require("../prisma");
 
-const router = express.Router()
-const prisma = new PrismaClient()
+const router = express.Router();
 
-// 🔹 LOGIN — REDIRECIONA PRO ML
-router.get('/login', (req, res) => {
-  const authUrl =
-    `https://auth.mercadolivre.com.br/authorization` +
-    `?response_type=code` +
-    `&client_id=${process.env.ML_CLIENT_ID}` +
-    `&redirect_uri=${encodeURIComponent(process.env.ML_REDIRECT_URI)}`
+/**
+ * CALLBACK DO MERCADO LIVRE
+ * URL cadastrada no ML:
+ * https://hotgroupvip-production.up.railway.app/ml/callback
+ */
+router.get("/login", async (req, res) => {
+  const code = req.query.code;
+  const userId = req.query.state;
 
-  res.redirect(authUrl)
-})
-
-// 🔹 CALLBACK — RECEBE CODE E SALVA TOKEN
-router.get('/callback', async (req, res) => {
-  const { code } = req.query
-
-  if (!code) {
-    return res.status(400).send('Code não recebido')
+  if (!code || !userId) {
+    return res.status(400).json({
+      error: "code ou state ausente",
+    });
   }
 
   try {
-    console.log('🔁 Trocando code por token...')
-
     const response = await axios.post(
-      'https://api.mercadolibre.com/oauth/token',
-      null,
+      "https://api.mercadolibre.com/oauth/token",
       {
-        params: {
-          grant_type: 'authorization_code',
-          client_id: process.env.ML_CLIENT_ID,
-          client_secret: process.env.ML_CLIENT_SECRET,
-          code,
-          redirect_uri: process.env.ML_REDIRECT_URI
-        }
+        grant_type: "authorization_code",
+        client_id: process.env.ML_CLIENT_ID,
+        client_secret: process.env.ML_CLIENT_SECRET,
+        code,
+        redirect_uri: process.env.ML_REDIRECT_URI,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-    )
+    );
 
-    console.log('💾 Salvando token no banco...')
+    const data = response.data;
 
-    await prisma.mercadoLivreToken.create({
-      data: {
-        accessToken: response.data.access_token,
-        refreshToken: response.data.refresh_token,
-        tokenType: response.data.token_type,
-        scope: response.data.scope ?? null,
-        expiresAt: new Date(
-          Date.now() + response.data.expires_in * 1000
-        )
-      }
-    })
+    const expiresAt = new Date(Date.now() + data.expires_in * 1000);
 
-    res.send('✅ Mercado Livre conectado com sucesso')
+    await prisma.mercadoLivreToken.upsert({
+      where: {
+        userId: userId,
+      },
+      update: {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        tokenType: data.token_type,
+        scope: data.scope,
+        expiresAt: expiresAt,
+      },
+      create: {
+        userId: userId,
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        tokenType: data.token_type,
+        scope: data.scope,
+        expiresAt: expiresAt,
+      },
+    });
 
+    return res.json({
+      success: true,
+      message: "Token Mercado Livre salvo com sucesso",
+    });
   } catch (error) {
-    console.error('❌ ERRO AO SALVAR TOKEN', {
-      message: error.message,
-      data: error.response?.data
-    })
+    console.error(
+      "❌ ERRO OAUTH ML:",
+      error.response?.data || error.message
+    );
 
-    res.status(500).send('Erro ao salvar token')
+    return res.status(500).json({
+      error: "Erro ao salvar token Mercado Livre",
+      details: error.response?.data || error.message,
+    });
   }
-})
+});
 
-export default router
+module.exports = router;
