@@ -1,11 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 model MercadoLivreToken {
-  id            String   @id @default(uuid())
-  userId        String   @unique
-  accessToken   String   @db.Text
-  refreshToken  String   @db.Text
-  tokenType     String
-  scope         String?
-  expiresAt     DateTime
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  accessToken  String   @db.Text
+  refreshToken String   @db.Text
+  tokenType    String
+  scope        String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
