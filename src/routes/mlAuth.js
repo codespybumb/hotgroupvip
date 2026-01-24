@@ -1,6 +1,6 @@
-const express = require("express");
-const axios = require("axios");
-const { PrismaClient } = require("@prisma/client");
+import express from "express";
+import axios from "axios";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -59,4 +59,4 @@ router.get("/callback", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
