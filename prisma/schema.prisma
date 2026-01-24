@@ -9,7 +9,7 @@ datasource db {
 
 model MercadoLivreToken {
   id           Int      @id @default(autoincrement())
-  userId       Int      @unique
+  userId       BigInt   @unique
   accessToken  String
   refreshToken String
   scope        String

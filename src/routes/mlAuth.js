@@ -1,12 +1,10 @@
 import express from "express";
-import axios from "axios";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../prisma.js";
+import { trocarCodePorToken } from "../mercadoLivre.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
-// inicia login
-router.get("/auth", (req, res) => {
+router.get("/ml/auth", (req, res) => {
   const url =
     "https://auth.mercadolivre.com.br/authorization" +
     "?response_type=code" +
@@ -16,48 +14,36 @@ router.get("/auth", (req, res) => {
   res.redirect(url);
 });
 
-// callback
-router.get("/callback", async (req, res) => {
+router.get("/ml/callback", async (req, res) => {
   const { code } = req.query;
-  if (!code) return res.status(400).json({ error: "code ausente" });
+  if (!code) return res.status(400).send("Code ausente");
 
   try {
-    const { data } = await axios.post(
-      "https://api.mercadolibre.com/oauth/token",
-      {
-        grant_type: "authorization_code",
-        client_id: process.env.ML_CLIENT_ID,
-        client_secret: process.env.ML_CLIENT_SECRET,
-        code,
-        redirect_uri: process.env.ML_REDIRECT_URI,
-      }
-    );
+    const data = await trocarCodePorToken(code);
 
     const expiresAt = new Date(Date.now() + data.expires_in * 1000);
 
     await prisma.mercadoLivreToken.upsert({
-      where: { userId: data.user_id },
+      where: { userId: BigInt(data.user_id) },
       update: {
         accessToken: data.access_token,
         refreshToken: data.refresh_token,
         scope: data.scope,
-        expiresAt,
+        expiresAt
       },
       create: {
-        userId: data.user_id,
+        userId: BigInt(data.user_id),
         accessToken: data.access_token,
         refreshToken: data.refresh_token,
         scope: data.scope,
-        expiresAt,
-      },
+        expiresAt
+      }
     });
 
-    res.json({ success: true });
+    res.send("Mercado Livre conectado com sucesso 🚀");
   } catch (err) {
-    res.status(500).json({
-      error: "Erro ao salvar token",
-      details: err.response?.data || err.message,
-    });
+    console.error(err.response?.data || err);
+    res.status(500).send("Erro ao autenticar ML");
   }
 });
 
