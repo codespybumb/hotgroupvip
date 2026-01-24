@@ -1,21 +1,21 @@
-const express = require('express')
-const mlAuthRoutes = require('./routes/mlAuth')
+const express = require("express");
 
-const app = express()
+const mlAuthRoutes = require("./routes/mlAuth");
 
-app.use(express.json())
+const app = express();
 
-// healthcheck (OBRIGATÓRIO PRA RAILWAY)
-app.get('/', (req, res) => {
-  res.status(200).send('API ONLINE')
-})
+app.use(express.json());
 
 // rotas Mercado Livre
-app.use('/ml', mlAuthRoutes)
+app.use("/ml", mlAuthRoutes);
 
-// ⚠️ NUNCA usar porta fixa
-const PORT = process.env.PORT || 3000
+// healthcheck Railway
+app.get("/", (req, res) => {
+  res.status(200).send("API ONLINE");
+});
+
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log('🚀 Server rodando na porta', PORT)
-})
+  console.log("🚀 Server rodando na porta", PORT);
+});
