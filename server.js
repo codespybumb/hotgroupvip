@@ -2,7 +2,7 @@ const express = require("express");
 
 const mlAuthRoutes = require("./routes/mlAuth");
 
-const app = express();s
+const app = express();
 
 app.use(express.json());
 
