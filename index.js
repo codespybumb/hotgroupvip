@@ -1,21 +1,16 @@
-const express = require("express");
+require('dotenv').config()
 
-const mlAuthRoutes = require("./routes/mlAuth");
+// ⚠️ IMPORTANTE
+// index.js NÃO pode iniciar servidor nem usar Prisma direto
+// ele só orquestra os módulos
 
-const app = express();
+require('./server')
 
-app.use(express.json());
+// bot e cron só se estiver habilitado (Railway-safe)
+if (process.env.ENABLE_BOT === 'true') {
+  require('./bot')
+}
 
-// ROTA MERCADO LIVRE
-app.use("/ml", mlAuthRoutes);
-
-// healthcheck (Railway gosta disso)
-app.get("/", (req, res) => {
-  res.send("API ONLINE");
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("🚀 Server rodando na porta", PORT);
-});
+if (process.env.ENABLE_CRON === 'true') {
+  require('./cron')
+}
