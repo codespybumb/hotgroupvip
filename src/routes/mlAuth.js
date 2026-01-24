@@ -2,9 +2,10 @@ import express from "express";
 import axios from "axios";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
 const router = express.Router();
+const prisma = new PrismaClient();
 
+// inicia login
 router.get("/auth", (req, res) => {
   const url =
     "https://auth.mercadolivre.com.br/authorization" +
@@ -15,6 +16,7 @@ router.get("/auth", (req, res) => {
   res.redirect(url);
 });
 
+// callback
 router.get("/callback", async (req, res) => {
   const { code } = req.query;
   if (!code) return res.status(400).json({ error: "code ausente" });

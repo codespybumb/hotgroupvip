@@ -8,12 +8,12 @@ datasource db {
 }
 
 model MercadoLivreToken {
-  id            Int      @id @default(autoincrement())
-  userId        Int      @unique
-  accessToken   String
-  refreshToken  String
-  scope         String
-  expiresAt     DateTime
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  accessToken  String
+  refreshToken String
+  scope        String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
