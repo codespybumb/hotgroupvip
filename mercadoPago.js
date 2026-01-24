@@ -13,7 +13,7 @@ async function criarAssinatura(telegramId, email) {
         transaction_amount: 29.9,
         currency_id: 'BRL'
       },
-      back_url: 'https://seusite.com/obrigado'
+      back_url: 'https://hotgroupvip-production.up.railway.app/ml/callback'
     },
     {
       headers: {
